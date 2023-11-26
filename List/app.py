@@ -1,11 +1,16 @@
 from flask import Flask, request
-from flask_restx import Api, Resource
+from flask_restx import Api, Resource, fields
 
 app = Flask(__name__)
 api = Api(app, doc = '/swagger/')
 
 list_ns = api.namespace('List', path='/items/', description='List')
 
+item_model = api.model('Item', {
+    'id': fields.Integer(readonly=True, description='id'),
+    'item': fields.String(required=True, description = "The item to be completed"),
+    'done': fields.Boolean(required=True, description="Item completed or not")
+})
 
 class Items():
 
@@ -46,9 +51,11 @@ items = Items()
 @list_ns.route('/')
 class ItemsAPI(Resource):
 
+    @list_ns.marshal_list_with(item_model)
     def get(self):
         return items.get_all()
 
+    @list_ns.expect(item_model)
     def post(self):
         data = request.get_json()
         new_item = items.create(data)
@@ -58,9 +65,11 @@ class ItemsAPI(Resource):
 @list_ns.route('/<int:id>')
 class ItemAPI(Resource):
 
+    @list_ns.marshal_with(item_model)
     def get(self, id):
         return items.get(id)
 
+    @list_ns.expect(item_model)
     def put(self, id):
         data = request.get_json()
         updated_item = items.update(id,data)
