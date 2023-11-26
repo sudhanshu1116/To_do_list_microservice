@@ -2,9 +2,9 @@ from flask import Flask, request
 from flask_restx import Api, Resource
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, doc = '/swagger/')
 
-list_ns = api.namespace('List', path='items', description='To Do List')
+list_ns = api.namespace('List', path='/items/', description='List')
 
 
 class Items():
@@ -13,7 +13,7 @@ class Items():
         self.counter = 0
         self.items = []
 
-    def get(self):
+    def get_all(self):
         return self.items
 
     def get(self, id):
@@ -43,11 +43,11 @@ items = Items()
 
 
 
-list_ns.route('/')
+@list_ns.route('/')
 class ItemsAPI(Resource):
 
     def get(self):
-        return items.get()
+        return items.get_all()
 
     def post(self):
         data = request.get_json()
@@ -55,7 +55,7 @@ class ItemsAPI(Resource):
         return new_item
 
 
-list_ns.route('/<int:id>')
+@list_ns.route('/<int:id>')
 class ItemAPI(Resource):
 
     def get(self, id):
@@ -72,4 +72,4 @@ class ItemAPI(Resource):
 
 
 if __name__ == '__main__':
-    app.run(debug =True)
+    app.run(host='127.0.0.1', port=5000, debug =True)
