@@ -7,7 +7,7 @@ api=Api(app,doc='/swagger/')
 #Renamed namespace to tasks
 task_ns=api.namespace('task',path='/tasks/',description='Task')
 
-#renamed to task, item-->taskname, added description
+#renamed to task, item-->taskname, added description👍
 item_model=api.model('task',{
     'id':fields.Integer(readonly=True,description='id'),
     'taskname': fields.String(required=True, description="The Item to be completed"),
