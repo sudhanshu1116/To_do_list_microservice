@@ -17,31 +17,63 @@ Item_model=api.model('task',{
     'End_time':fields.String(reqired=True,description="End Time")
 })
 
-class task_Items():
+class TaskItems():
+
     def __init__(self):
         self.counter=0
-        self.Task=[]
+        self.tasks=[]
+
     def get_all(self):
-        return self.Task
+        return self.tasks
+    
     def get(self,id):
-        for Task in self.Task:
-            if Task['id']==id:
-                return Task
+        for task in self.tasks:
+            if task['id']==id:
+                return task
         api.abort(400,'Task not Found')
+
     def create(self,data):
-        Task=data
-        Task['id']=self.counter+1
+        task=data
+        task['id']=self.counter+1
         self.counter+=1
-        self.Task.append(Task)
-        return Task
+        self.tasks.append(task)
+        return task
+    
     def update(self,id,data):
-        Task=self.get(id)
-        Task.update(data)
-        return Task
+        task=self.get(id)
+        task.update(data)
+        return task
+    
     def delete(self,id):
-        Task=self.get(id)
-        self.Task.remove(Task)
-Task=task_Items()
+        task=self.get(id)
+        self.task.remove(task)
+
+task=TaskItems()
+@task_ns.route('/')
+class TasksAPI(Resource):
+    @task_ns.marshal_list_with(Item_model)
+    def get(self):
+        return TaskItems.get_all()
+    
+    @task_ns.expect(Item_model)
+    def post(self):
+        data =request.get_json()
+        new_task=TaskItems.create(data)
+        return new_task
+    
+@task_ns.route('/<int:id>')
+class TaskAPI(Resource):
+    @task_ns.marshal_with(Item_model)
+    def get(self,id):
+        return task.get(id)
+    @task_ns.expect(Item_model)
+    def get(self,id):
+        data =request.get_json()
+        updated_task=TaskItems.update(id,data)
+        return task.get(id)
+    def delete(self,id):
+        TaskItems.delete(id)
+        return{'Message':'Successfully deleted'}
 
 if __name__ =='__main__':
     app.run(host='127.0.0.1',port=5001, debug=True)
